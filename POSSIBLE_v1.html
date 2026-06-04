@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>POSSIBLE — AI Intelligence System</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #05070f;
+    --cyan: #00d4ff;
+    --cyan2: #00aaff;
+    --cyan-dim: rgba(0,212,255,0.5);
+    --cyan-glow: rgba(0,212,255,0.08);
+    --cyan-border: rgba(0,212,255,0.18);
+    --cyan-border-bright: rgba(0,212,255,0.5);
+    --red: #ff3c5a;
+    --green: #00ffaa;
+    --yellow: #ffd600;
+    --text: #d8eeff;
+    --text-dim: rgba(216,238,255,0.5);
+    --text-muted: rgba(216,238,255,0.22);
+    --glass: rgba(8,20,45,0.6);
+    --glass2: rgba(5,14,32,0.75);
+    --glass-border: rgba(0,212,255,0.12);
+    --font-display: 'Orbitron', monospace;
+    --font-ui: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  /* Rich layered background */
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .bg-layer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,100,200,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 10% 90%, rgba(0,60,140,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 40% at 90% 80%, rgba(0,40,120,0.10) 0%, transparent 50%);
+  }
+  .bg-layer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* Noise texture overlay */
+  .noise {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 128px 128px;
+  }
+
+  .scanline {
+    position: fixed;
+    top: -2px; left: 0;
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.15) 30%, rgba(0,212,255,0.4) 50%, rgba(0,212,255,0.15) 70%, transparent 100%);
+    animation: scan 10s linear infinite;
+    z-index: 999;
+    pointer-events: none;
+  }
+  @keyframes scan { 0% { top: -2px; } 100% { top: 100vh; } }
+
+  /* SHELL */
+  .shell {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-rows: 64px 1fr 110px;
+    grid-template-columns: 220px 1fr 300px;
+    height: 100vh;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  /* GLASS PANEL BASE */
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, rgba(0,212,255,0.9), rgba(0,80,180,0.4));
+    box-shadow: 0 0 20px rgba(0,212,255,0.4), 0 0 40px rgba(0,212,255,0.15);
+    border: 1px solid rgba(0,212,255,0.4);
+    flex-shrink: 0;
+    animation: logopulse 4s ease-in-out infinite;
+  }
+  @keyframes logopulse {
+    0%,100% { box-shadow: 0 0 20px rgba(0,212,255,0.4), 0 0 40px rgba(0,212,255,0.15); }
+    50% { box-shadow: 0 0 30px rgba(0,212,255,0.7), 0 0 60px rgba(0,212,255,0.25); }
+  }
+  .logo {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 10px;
+    color: var(--cyan);
+    text-shadow: 0 0 30px rgba(0,212,255,0.5);
+  }
+  .logo-sub {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 3px;
+    margin-top: 2px;
+  }
+
+  .top-pills {
+    display: flex;
+    gap: 8px;
+  }
+  .pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--glass-border);
+    background: rgba(0,212,255,0.05);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    backdrop-filter: blur(10px);
+  }
+  .pill-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .pill-dot.r { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .pill-dot.y { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .top-clock {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    text-shadow: 0 0 15px rgba(0,212,255,0.4);
+  }
+
+  /* LEFT SIDEBAR */
+  .sidebar-left {
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .panel-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--text-muted);
+    letter-spacing: 3px;
+    padding: 0 8px 12px;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+  }
+  .nav-item:hover {
+    background: rgba(0,212,255,0.06);
+    border-color: var(--cyan-border);
+    color: var(--text);
+  }
+  .nav-item.active {
+    background: rgba(0,212,255,0.08);
+    border-color: rgba(0,212,255,0.25);
+    color: var(--cyan);
+    box-shadow: inset 0 0 20px rgba(0,212,255,0.05), 0 0 0 1px rgba(0,212,255,0.05);
+  }
+  .nav-icon { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .divider {
+    height: 1px;
+    background: var(--glass-border);
+    margin: 8px 0;
+  }
+
+  .threat-panel {
+    margin-top: auto;
+    padding: 14px;
+    border-radius: 6px;
+    background: rgba(255,60,90,0.04);
+    border: 1px solid rgba(255,60,90,0.15);
+  }
+  .threat-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: rgba(255,60,90,0.6);
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+  }
+  .threat-track {
+    height: 3px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .threat-fill {
+    height: 100%;
+    width: 28%;
+    background: linear-gradient(90deg, var(--yellow), var(--red));
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(255,60,90,0.5);
+  }
+  .threat-val {
+    font-family: var(--font-display);
+    font-size: 16px;
+    color: var(--yellow);
+    text-shadow: 0 0 12px rgba(255,214,0,0.4);
+    letter-spacing: 2px;
+  }
+
+  /* MAIN CENTER */
+  .main-center {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .orb-stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Ambient glow behind orb */
+  .orb-stage::before {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .orb {
+    width: 160px; height: 160px;
+    position: relative;
+  }
+  .orb-core {
+    position: absolute;
+    inset: 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%,
+      rgba(120,220,255,0.9) 0%,
+      rgba(0,160,255,0.6) 30%,
+      rgba(0,60,160,0.4) 60%,
+      transparent 80%);
+    box-shadow:
+      0 0 40px rgba(0,212,255,0.35),
+      0 0 80px rgba(0,212,255,0.15),
+      inset 0 0 30px rgba(0,212,255,0.2),
+      inset 0 -10px 30px rgba(0,30,100,0.4);
+    animation: corepulse 5s ease-in-out infinite;
+  }
+  @keyframes corepulse {
+    0%,100% { box-shadow: 0 0 40px rgba(0,212,255,0.35), 0 0 80px rgba(0,212,255,0.15), inset 0 0 30px rgba(0,212,255,0.2); }
+    50% { box-shadow: 0 0 60px rgba(0,212,255,0.6), 0 0 120px rgba(0,212,255,0.25), inset 0 0 40px rgba(0,212,255,0.35); }
+  }
+
+  /* Glass ring */
+  .orb-ring {
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,212,255,0.2);
+    animation: spin 14s linear infinite;
+    backdrop-filter: blur(2px);
+  }
+  .orb-ring::before, .orb-ring::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+  }
+  .orb-ring::before { width: 5px; height: 5px; top: -3px; left: 50%; transform: translateX(-50%); }
+  .orb-ring::after { width: 3px; height: 3px; bottom: -2px; left: 30%; background: rgba(0,212,255,0.5); box-shadow: none; }
+
+  .orb-ring2 {
+    position: absolute;
+    inset: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,212,255,0.08);
+    animation: spin 24s linear infinite reverse;
+  }
+  .orb-ring3 {
+    position: absolute;
+    inset: -18px;
+    border-radius: 50%;
+    border: 1px dashed rgba(0,212,255,0.07);
+    animation: spin 40s linear infinite;
+  }
+
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+  .orb-label {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-display);
+    font-size: 9px;
+    letter-spacing: 8px;
+    color: var(--cyan-dim);
+    white-space: nowrap;
+  }
+
+  /* Voice bars */
+  .vizbar-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 16px 0 8px;
+    height: 52px;
+  }
+  .vbar {
+    width: 2px;
+    background: linear-gradient(to top, rgba(0,212,255,0.8), rgba(0,212,255,0.2));
+    border-radius: 2px;
+    animation: vbaranim 1.4s ease-in-out infinite;
+  }
+  .vbar:nth-child(1){height:6px;animation-delay:0s}
+  .vbar:nth-child(2){height:16px;animation-delay:0.1s}
+  .vbar:nth-child(3){height:28px;animation-delay:0.2s}
+  .vbar:nth-child(4){height:20px;animation-delay:0.3s}
+  .vbar:nth-child(5){height:36px;animation-delay:0.13s}
+  .vbar:nth-child(6){height:24px;animation-delay:0.24s}
+  .vbar:nth-child(7){height:32px;animation-delay:0.07s}
+  .vbar:nth-child(8){height:18px;animation-delay:0.35s}
+  .vbar:nth-child(9){height:10px;animation-delay:0.42s}
+  .vbar:nth-child(10){height:6px;animation-delay:0.5s}
+  @keyframes vbaranim {
+    0%,100%{transform:scaleY(0.25);opacity:0.25}
+    50%{transform:scaleY(1);opacity:0.9}
+  }
+
+  /* Response */
+  .response-wrap {
+    padding: 0 24px 10px;
+    min-height: 70px;
+    max-height: 120px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--glass-border) transparent;
+  }
+  .resp-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--cyan-dim);
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+  .resp-text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.9;
+    letter-spacing: 0.3px;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .resp-text.on { opacity: 1; }
+  .cursor {
+    display: inline-block;
+    width: 7px; height: 13px;
+    background: var(--cyan);
+    vertical-align: middle;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* Input bar */
+  .input-bar {
+    padding: 14px 20px;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: rgba(5,10,25,0.5);
+    backdrop-filter: blur(20px);
+    border-radius: 0 0 8px 8px;
+  }
+  .chat-input {
+    flex: 1;
+    background: rgba(0,212,255,0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 10px 16px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    outline: none;
+    transition: all 0.25s;
+  }
+  .chat-input::placeholder { color: var(--text-muted); }
+  .chat-input:focus {
+    border-color: rgba(0,212,255,0.35);
+    background: rgba(0,212,255,0.06);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.06);
+  }
+  .btn-send {
+    padding: 10px 22px;
+    background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,120,255,0.1));
+    border: 1px solid rgba(0,212,255,0.35);
+    color: var(--cyan);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.25s;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+  }
+  .btn-send:hover {
+    background: linear-gradient(135deg, rgba(0,212,255,0.25), rgba(0,120,255,0.2));
+    box-shadow: 0 0 20px rgba(0,212,255,0.2);
+  }
+  .btn-mic {
+    width: 40px; height: 40px;
+    padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: rgba(0,212,255,0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-dim);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.25s;
+    backdrop-filter: blur(10px);
+  }
+  .btn-mic:hover { border-color: var(--cyan-border); color: var(--cyan); }
+  .btn-mic.on {
+    background: rgba(255,60,90,0.1);
+    border-color: rgba(255,60,90,0.4);
+    color: var(--red);
+    box-shadow: 0 0 20px rgba(255,60,90,0.2);
+    animation: micglow 1s ease-in-out infinite;
+  }
+  @keyframes micglow { 0%,100%{box-shadow:0 0 20px rgba(255,60,90,0.2)} 50%{box-shadow:0 0 35px rgba(255,60,90,0.45)} }
+
+  /* RIGHT SIDEBAR */
+  .sidebar-right {
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .news-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--glass-border) transparent;
+  }
+  .news-item {
+    padding: 12px 8px;
+    border-bottom: 1px solid rgba(0,212,255,0.07);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 4px;
+  }
+  .news-item:hover {
+    background: rgba(0,212,255,0.04);
+    padding-left: 12px;
+  }
+  .news-item:last-child { border-bottom: none; }
+  .news-tag {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--cyan-dim);
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+  }
+  .news-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.5;
+    letter-spacing: 0.3px;
+  }
+  .news-time {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 5px;
+  }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .stat-card:hover::after { opacity: 0.6; }
+  .stat-card-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .stat-card-val {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(0,212,255,0.35);
+    letter-spacing: 1px;
+    line-height: 1;
+    margin: 6px 0 2px;
+  }
+  .stat-card-val.g { color: var(--green); text-shadow: 0 0 20px rgba(0,255,170,0.35); }
+  .stat-card-val.r { color: var(--red); text-shadow: 0 0 20px rgba(255,60,90,0.35); }
+  .stat-card-val.y { color: var(--yellow); text-shadow: 0 0 20px rgba(255,214,0,0.35); }
+  .stat-card-sub {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+
+  /* LOADER */
+  .loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.8s ease;
+  }
+  .loader.out { opacity: 0; pointer-events: none; }
+  .load-logo {
+    font-family: var(--font-display);
+    font-size: 52px;
+    font-weight: 900;
+    letter-spacing: 18px;
+    color: var(--cyan);
+    text-shadow: 0 0 40px var(--cyan), 0 0 100px rgba(0,212,255,0.2);
+    animation: glitch 3s ease-in-out infinite;
+  }
+  @keyframes glitch {
+    0%,93%,100%{ text-shadow: 0 0 40px var(--cyan), 0 0 100px rgba(0,212,255,0.2); transform:none; }
+    94%{ text-shadow: -2px 0 var(--red), 2px 0 var(--green); transform:skewX(-1deg); }
+    95%{ text-shadow: 2px 0 var(--red), -2px 0 var(--green); transform:skewX(1deg); }
+    96%{ text-shadow: 0 0 40px var(--cyan); transform:none; }
+  }
+  .load-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 5px;
+    margin-top: 14px;
+  }
+  .load-progress {
+    width: 280px; height: 1px;
+    background: rgba(0,212,255,0.08);
+    margin-top: 36px;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .load-bar {
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--cyan));
+    box-shadow: 0 0 10px var(--cyan);
+    animation: loadbar 2.5s ease forwards;
+  }
+  @keyframes loadbar { from{width:0} to{width:100%} }
+  .news-loading {
+    display: flex;
+    gap: 6px;
+    padding: 24px 8px;
+    align-items: center;
+  }
+  .news-load-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--cyan-dim);
+    animation: dotpulse 1.2s ease-in-out infinite;
+  }
+  .news-load-dot:nth-child(2) { animation-delay: 0.2s; }
+  .news-load-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotpulse { 0%,100%{opacity:0.2;transform:scale(0.8)} 50%{opacity:1;transform:scale(1.1)} }
+
+  /* CAMS */
+  .cam-card {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    background: #020408;
+    aspect-ratio: 16/10;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .cam-card:hover { border-color: rgba(0,212,255,0.35); }
+  .cam-card iframe {
+    width: 100%; height: 100%;
+    border: none;
+    pointer-events: none;
+  }
+  .cam-label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 6px 10px;
+    background: linear-gradient(transparent, rgba(2,4,10,0.95));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cam-city {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+  .cam-live {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--red);
+    letter-spacing: 1px;
+  }
+  .cam-live-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 5px var(--red);
+    animation: pulse 1s ease-in-out infinite;
+  }
+  .cam-offline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 6px;
+    opacity: 0.4;
+  }
+  .cam-offline-icon { font-size: 20px; }
+  .cam-offline-txt { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); letter-spacing: 2px; }
+  .cam-region-btn {
+    padding: 4px 10px;
+    border-radius: 100px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cam-region-btn.active {
+    background: rgba(0,212,255,0.1);
+    color: var(--cyan);
+    border-color: rgba(0,212,255,0.3);
+  }
+
+  /* MAP */
+  #viewMap { display:flex; }
+  #mapContainer { background: #05070f; }
+  .leaflet-container { background: #05070f !important; }
+  .leaflet-tile { filter: invert(1) hue-rotate(180deg) saturate(0.4) brightness(0.5) !important; }
+  .leaflet-control-zoom a {
+    background: rgba(6,18,40,0.9) !important;
+    color: var(--cyan) !important;
+    border-color: var(--glass-border) !important;
+    font-family: var(--font-mono) !important;
+  }
+  .leaflet-control-attribution { display: none !important; }
+  .map-pin {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    animation: pinpulse 2s ease-in-out infinite;
+    position: relative;
+  }
+  @keyframes pinpulse {
+    0%,100%{ transform:scale(1); opacity:0.9; }
+    50%{ transform:scale(1.3); opacity:1; }
+  }
+  .map-pin::after {
+    content:'';
+    position:absolute;
+    inset:-4px;
+    border-radius:50%;
+    border:1px solid currentColor;
+    opacity:0.3;
+    animation: pinring 2s ease-in-out infinite;
+  }
+  @keyframes pinring {
+    0%{ transform:scale(0.8); opacity:0.5; }
+    100%{ transform:scale(2); opacity:0; }
+  }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+</head>
+<body>
+
+<div class="loader" id="loader">
+  <div class="load-logo">POSSIBLE</div>
+  <div class="load-sub">INITIALIZING INTELLIGENCE SYSTEM</div>
+  <div class="load-progress"><div class="load-bar"></div></div>
+</div>
+
+<div class="bg-layer"></div>
+<div class="noise"></div>
+<div class="scanline"></div>
+
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <header class="topbar glass">
+    <div class="logo-wrap">
+      <div class="logo-icon"></div>
+      <div>
+        <div class="logo">POSSIBLE</div>
+        <div class="logo-sub">OK EMPIRE · INTELLIGENCE SYSTEM v1.0</div>
+      </div>
+    </div>
+    <div class="top-pills">
+      <div class="pill"><div class="pill-dot"></div>SYSTEMS ONLINE</div>
+      <div class="pill"><div class="pill-dot y"></div>NEWS LIVE</div>
+      <div class="pill"><div class="pill-dot r"></div>3 ALERTS</div>
+    </div>
+    <div class="top-clock" id="clock">--:--:--</div>
+  </header>
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left glass">
+    <div class="panel-label">// NAVIGATION</div>
+    <div class="nav-item active">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      INTELLIGENCE
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      WORLD FEED
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4"/></svg>
+      LIVE CAMS
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      WORLD MAP
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      ANALYTICS
+    </div>
+    <div class="divider"></div>
+    <div class="nav-item">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+      PROFILE
+    </div>
+    <div class="threat-panel">
+      <div class="threat-label">// GLOBAL THREAT</div>
+      <div class="threat-track"><div class="threat-fill"></div></div>
+      <div class="threat-val">LOW</div>
+    </div>
+  </aside>
+
+  <!-- MAIN CENTER -->
+  <main class="main-center glass">
+
+    <!-- INTELLIGENCE VIEW -->
+    <div id="viewIntelligence">
+      <div class="orb-stage">
+        <div class="orb">
+          <div class="orb-ring3"></div>
+          <div class="orb-ring"></div>
+          <div class="orb-ring2"></div>
+          <div class="orb-core"></div>
+          <div class="orb-label">POSSIBLE AI</div>
+        </div>
+      </div>
+      <div class="vizbar-wrap">
+        <div class="vbar"></div><div class="vbar"></div><div class="vbar"></div>
+        <div class="vbar"></div><div class="vbar"></div><div class="vbar"></div>
+        <div class="vbar"></div><div class="vbar"></div><div class="vbar"></div>
+        <div class="vbar"></div>
+      </div>
+      <div class="response-wrap" id="respWrap">
+        <div class="resp-label">// POSSIBLE RESPONSE</div>
+        <div class="resp-text on" id="respText">All systems nominal. Ready for your command.<span class="cursor"></span></div>
+      </div>
+      <div class="input-bar">
+        <button class="btn-mic" id="micBtn">🎙</button>
+        <input class="chat-input" id="chatInput" placeholder="Ask POSSIBLE anything..." autocomplete="off"/>
+        <button class="btn-send" id="sendBtn">TRANSMIT</button>
+      </div>
+    </div>
+
+    <!-- WORLD MAP VIEW -->
+    <div id="viewMap" style="display:none;flex:1;flex-direction:column;height:100%;position:relative;">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;">
+        <div class="panel-label" style="padding:0;margin:0;">// WORLD INTELLIGENCE MAP</div>
+        <div style="display:flex;gap:8px;" id="mapLegend">
+          <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);">
+            <div style="width:8px;height:8px;border-radius:50%;background:#ff3c5a;box-shadow:0 0 6px #ff3c5a;"></div>CONFLICT
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);">
+            <div style="width:8px;height:8px;border-radius:50%;background:#ffd600;box-shadow:0 0 6px #ffd600;"></div>ALERT
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);">
+            <div style="width:8px;height:8px;border-radius:50%;background:#00d4ff;box-shadow:0 0 6px #00d4ff;"></div>NEWS
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);">
+            <div style="width:8px;height:8px;border-radius:50%;background:#00ffaa;box-shadow:0 0 6px #00ffaa;"></div>SCIENCE
+          </div>
+        </div>
+      </div>
+      <div id="mapContainer" style="flex:1;position:relative;overflow:hidden;"></div>
+      <!-- Tooltip -->
+      <div id="mapTooltip" style="display:none;position:absolute;z-index:100;background:rgba(6,18,40,0.95);border:1px solid rgba(0,212,255,0.3);border-radius:6px;padding:10px 14px;backdrop-filter:blur(20px);pointer-events:none;max-width:220px;">
+        <div id="ttTag" style="font-family:var(--font-mono);font-size:8px;color:var(--cyan-dim);letter-spacing:2px;margin-bottom:4px;"></div>
+        <div id="ttTitle" style="font-family:var(--font-ui);font-size:12px;color:var(--text);line-height:1.4;"></div>
+        <div id="ttCountry" style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);margin-top:5px;"></div>
+      </div>
+    </div>
+
+    <!-- LIVE CAMS VIEW -->
+    <div id="viewCams" style="display:none;flex:1;flex-direction:column;height:100%;overflow:hidden;">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--glass-border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div class="panel-label" style="padding:0;margin:0;">// LIVE GLOBAL CAM FEEDS</div>
+        <div style="display:flex;gap:6px;" id="camRegionBtns"></div>
+      </div>
+      <div id="camGrid" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;scrollbar-width:thin;scrollbar-color:var(--glass-border) transparent;"></div>
+    </div>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sidebar-right glass">
+    <div class="panel-label">// LIVE WORLD FEED</div>
+    <div class="news-list" id="newsFeed">
+      <div class="news-loading">
+        <div class="news-load-dot"></div>
+        <div class="news-load-dot"></div>
+        <div class="news-load-dot"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- BOTTOM STATS -->
+  <footer class="bottom-bar">
+    <div class="stat-card glass">
+      <div class="stat-card-label">ACTIVE FEEDS</div>
+      <div class="stat-card-val" id="feedCount">247</div>
+      <div class="stat-card-sub">LIVE SOURCES</div>
+    </div>
+    <div class="stat-card glass">
+      <div class="stat-card-label">GLOBAL EVENTS</div>
+      <div class="stat-card-val y">1,842</div>
+      <div class="stat-card-sub">↑ 12% TODAY</div>
+    </div>
+    <div class="stat-card glass">
+      <div class="stat-card-label">RESPONSE TIME</div>
+      <div class="stat-card-val g">0.3s</div>
+      <div class="stat-card-sub">OPTIMAL</div>
+    </div>
+    <div class="stat-card glass">
+      <div class="stat-card-label">ACTIVE ALERTS</div>
+      <div class="stat-card-val r">3</div>
+      <div class="stat-card-sub">2 LOW · 1 MED</div>
+    </div>
+    <div class="stat-card glass">
+      <div class="stat-card-label">SYSTEM UPTIME</div>
+      <div class="stat-card-val" id="uptime">00:00:00</div>
+      <div class="stat-card-sub">100% AVAILABLE</div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // Loader
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('out');
+    setTimeout(() => document.getElementById('loader').remove(), 900);
+  }, 2800);
+
+  // Clock
+  function tick() {
+    const n = new Date();
+    document.getElementById('clock').textContent =
+      n.toLocaleTimeString('en-US', { hour12: false });
+  }
+  setInterval(tick, 1000); tick();
+
+  // Uptime
+  const t0 = Date.now();
+  setInterval(() => {
+    const s = Math.floor((Date.now()-t0)/1000);
+    const h = String(Math.floor(s/3600)).padStart(2,'0');
+    const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+    const sc = String(s%60).padStart(2,'0');
+    document.getElementById('uptime').textContent = `${h}:${m}:${sc}`;
+  }, 1000);
+
+  // Nav + view switching
+  const views = {
+    'INTELLIGENCE': 'viewIntelligence',
+    'WORLD MAP': 'viewMap',
+    'LIVE CAMS': 'viewCams',
+  };
+  let mapInitialized = false;
+  let camsInitialized = false;
+
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      const label = el.textContent.trim();
+
+      // Hide all views
+      document.getElementById('viewIntelligence').style.display = 'none';
+      document.getElementById('viewMap').style.display = 'none';
+      document.getElementById('viewCams').style.display = 'none';
+
+      if (label === 'WORLD MAP') {
+        document.getElementById('viewMap').style.display = 'flex';
+        if (!mapInitialized) { initMap(); mapInitialized = true; }
+      } else if (label === 'LIVE CAMS') {
+        document.getElementById('viewCams').style.display = 'flex';
+        if (!camsInitialized) { initCams(); camsInitialized = true; }
+      } else {
+        document.getElementById('viewIntelligence').style.display = 'flex';
+        document.getElementById('viewIntelligence').style.flexDirection = 'column';
+      }
+    });
+  });
+
+  // Set intelligence view flex on load
+  document.getElementById('viewIntelligence').style.display = 'flex';
+  document.getElementById('viewIntelligence').style.flexDirection = 'column';
+
+  // ── WORLD MAP ────────────────────────────────────────────────
+  const NEWS_KEY = '409382f8485b4edcb50b47b07b154933';
+
+  // Country coords lookup
+  const COUNTRY_COORDS = {
+    'us':[-95,38],'gb':[-2,54],'fr':[2,47],'de':[10,51],'cn':[105,35],
+    'in':[78,22],'ru':[105,61],'br':[-53,-15],'au':[134,-26],'jp':[138,36],
+    'za':[25,-30],'ng':[8,10],'eg':[30,27],'sa':[45,24],'ir':[53,33],
+    'ua':[32,49],'tr':[35,39],'mx':[-102,24],'id':[118,-5],'pk':[70,30],
+    'ar':[-65,-35],'ca':[-96,60],'it':[12,43],'es':[-4,40],'kr':[128,37],
+    'th':[101,15],'vn':[108,16],'ph':[122,13],'my':[110,4],'pl':[20,52],
+    'nl':[5,52],'be':[4,51],'se':[18,62],'no':[10,62],'dk':[10,56],
+    'fi':[26,62],'il':[35,32],'sy':[38,35],'iq':[44,33],'af':[67,34],
+    'ly':[17,27],'sd':[30,16],'et':[40,9],'ke':[38,1],'tz':[35,-6],
+    'gh':[1,8],'cm':[12,6],'ao':[18,-12],'mz':[35,-18],'ve':[-65,8],
+    'co':[-74,4],'cl':[-71,-36],'pe':[-76,-10],'bd':[90,24],'lk':[81,7],
+  };
+
+  const CATEGORY_COLORS = {
+    technology: '#00d4ff',
+    science: '#00ffaa',
+    health: '#00ffaa',
+    business: '#ffd600',
+    general: '#ffd600',
+    conflict: '#ff3c5a',
+  };
+
+  // Static conflict/alert pins
+  const STATIC_EVENTS = [
+    { lat:49.0, lng:32.0, type:'conflict', title:'Ongoing conflict zone — Ukraine', country:'Ukraine' },
+    { lat:31.5, lng:35.0, type:'conflict', title:'Regional tensions — Middle East', country:'Israel/Gaza' },
+    { lat:15.5, lng:32.5, type:'conflict', title:'Civil unrest — Sudan', country:'Sudan' },
+    { lat:34.5, lng:69.2, type:'conflict', title:'Security situation — Afghanistan', country:'Afghanistan' },
+    { lat:23.7, lng:90.4, type:'alert', title:'Climate emergency declared', country:'Bangladesh' },
+    { lat:-8.8, lng:13.2, type:'alert', title:'Humanitarian aid operations active', country:'Angola' },
+  ];
+
+  function initMap() {
+    const map = L.map('mapContainer', {
+      center: [20, 10],
+      zoom: 2,
+      zoomControl: true,
+      attributionControl: false,
+      minZoom: 2,
+      maxZoom: 8,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 8,
+    }).addTo(map);
+
+    const tooltip = document.getElementById('mapTooltip');
+    const ttTag = document.getElementById('ttTag');
+    const ttTitle = document.getElementById('ttTitle');
+    const ttCountry = document.getElementById('ttCountry');
+
+    function addPin(lat, lng, color, tag, title, country) {
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="map-pin" style="background:${color};box-shadow:0 0 10px ${color};color:${color};"></div>`,
+        iconSize: [10, 10],
+        iconAnchor: [5, 5],
+      });
+      const marker = L.marker([lat, lng], { icon }).addTo(map);
+      marker.on('mouseover', (e) => {
+        ttTag.textContent = tag;
+        ttTitle.textContent = title;
+        ttCountry.textContent = country;
+        tooltip.style.display = 'block';
+        tooltip.style.left = (e.originalEvent.offsetX + 16) + 'px';
+        tooltip.style.top = (e.originalEvent.offsetY - 10) + 'px';
+      });
+      marker.on('mouseout', () => { tooltip.style.display = 'none'; });
+    }
+
+    // Add static conflict/alert pins
+    STATIC_EVENTS.forEach(e => {
+      const color = e.type === 'conflict' ? '#ff3c5a' : '#ffd600';
+      addPin(e.lat, e.lng, color, e.type.toUpperCase(), e.title, e.country);
+    });
+
+    // Fetch news and plot pins by country
+    async function plotNewsOnMap() {
+      try {
+        const RSS_MAP = {
+          technology: 'https://feeds.bbci.co.uk/news/technology/rss.xml',
+          science: 'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
+          general: 'https://feeds.bbci.co.uk/news/rss.xml',
+          business: 'https://feeds.bbci.co.uk/news/business/rss.xml',
+        };
+        for (const [cat, rssUrl] of Object.entries(RSS_MAP)) {
+          const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=10`);
+          const data = await res.json();
+          if (data.status !== 'ok') continue;
+          data.items.forEach(article => {
+            const src = article.title || '';
+            let coords = null;
+            // Place pins at BBC HQ + random offset per category
+            const base = COUNTRY_COORDS['gb'];
+            coords = [base[0] + (Math.random()-0.5)*80, base[1] + (Math.random()-0.5)*40];
+            const color = CATEGORY_COLORS[cat] || '#00d4ff';
+            addPin(coords[1], coords[0], color, cat.toUpperCase(), article.title?.substring(0,80) || '', 'BBC News');
+          });
+        }
+      } catch(e) { console.log('Map news fetch error', e); }
+    }
+
+    plotNewsOnMap();
+
+    // Move tooltip with mouse over map
+    document.getElementById('mapContainer').addEventListener('mousemove', (e) => {
+      if (tooltip.style.display === 'block') {
+        tooltip.style.left = (e.offsetX + 16) + 'px';
+        tooltip.style.top = (e.offsetY - 10) + 'px';
+      }
+    });
+  }
+
+  // ── LIVE CAMS ────────────────────────────────────────────────
+  // Using YouTube live streams — always embeddable, no domain restrictions
+  const CAM_DATA = {
+    ALL: [
+      { city:'Times Square, NYC', region:'AMERICAS', yt:'i6sL0DaFpDc' },
+      { city:'Tokyo Shibuya Crossing', region:'ASIA', yt:'wbCsHMfDoSg' },
+      { city:'Eiffel Tower, Paris', region:'EUROPE', yt:'YbyGgqvSDh4' },
+      { city:'Dubai Downtown', region:'MIDDLE EAST', yt:'9PIxBra4g4o' },
+      { city:'London Westminster', region:'EUROPE', yt:'SrCKVGGVcBY' },
+      { city:'Sydney Harbour, AU', region:'ASIA', yt:'RUyMcqQgPAE' },
+      { city:'New York City Live', region:'AMERICAS', yt:'1-iTbMUJoSo' },
+      { city:'Bangkok City Live', region:'ASIA', yt:'cGPtgJqA0CU' },
+      { city:'Amsterdam Canals', region:'EUROPE', yt:'I1ov_n0I394' },
+      { city:'Chicago Downtown', region:'AMERICAS', yt:'S-VgFpOv_oE' },
+      { city:'Singapore Marina', region:'ASIA', yt:'86YLFOog4GM' },
+      { city:'Istanbul Live', region:'MIDDLE EAST', yt:'s0SWZV0OPhY' },
+    ],
+    AMERICAS: [],
+    EUROPE: [],
+    ASIA: [],
+    'MIDDLE EAST': [],
+  };
+  CAM_DATA.ALL.forEach(c => { if(CAM_DATA[c.region]) CAM_DATA[c.region].push(c); });
+
+  function initCams() {
+    const regions = ['ALL','AMERICAS','EUROPE','ASIA','MIDDLE EAST'];
+    let activeCamRegion = 'ALL';
+
+    const btnWrap = document.getElementById('camRegionBtns');
+    btnWrap.innerHTML = regions.map(r =>
+      `<button class="cam-region-btn ${r==='ALL'?'active':''}" data-r="${r}">${r}</button>`
+    ).join('');
+
+    btnWrap.querySelectorAll('.cam-region-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btnWrap.querySelectorAll('.cam-region-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCamRegion = btn.dataset.r;
+        renderCams(activeCamRegion);
+      });
+    });
+
+    renderCams('ALL');
+  }
+
+  function renderCams(region) {
+    const grid = document.getElementById('camGrid');
+    const cams = CAM_DATA[region] || CAM_DATA.ALL;
+    grid.innerHTML = cams.map(cam => `
+      <div class="cam-card">
+        <iframe
+          src="https://www.youtube.com/embed/${cam.yt}?autoplay=1&mute=1&controls=0&rel=0&loop=1&playlist=${cam.yt}"
+          loading="lazy"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+          title="${cam.city}">
+        </iframe>
+        <div class="cam-label">
+          <div class="cam-city">${cam.city}</div>
+          <div class="cam-live"><div class="cam-live-dot"></div>LIVE</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── CHAT ─────────────────────────────────────────────────────
+  const input = document.getElementById('chatInput');
+  const respText = document.getElementById('respText');
+
+  function typeText(txt) {
+    respText.innerHTML = '';
+    respText.classList.add('on');
+    let i = 0;
+    const cur = document.createElement('span');
+    cur.className = 'cursor';
+    respText.appendChild(cur);
+    const iv = setInterval(() => {
+      if (i < txt.length) {
+        respText.insertBefore(document.createTextNode(txt[i++]), cur);
+      } else clearInterval(iv);
+    }, 16);
+    // Speak the response
+    speak(txt);
+  }
+
+  // ── VOICE OUTPUT ────────────────────────────────────────────
+  let voiceEnabled = true;
+  let currentUtterance = null;
+
+  // Voice toggle button
+  const inputBar = document.querySelector('.input-bar');
+  const voiceToggle = document.createElement('button');
+  voiceToggle.className = 'btn-mic';
+  voiceToggle.id = 'voiceToggle';
+  voiceToggle.title = 'Toggle voice output';
+  voiceToggle.innerHTML = '🔊';
+  voiceToggle.style.cssText = 'background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.3);color:var(--cyan);';
+  inputBar.appendChild(voiceToggle);
+
+  voiceToggle.addEventListener('click', () => {
+    voiceEnabled = !voiceEnabled;
+    if (!voiceEnabled) {
+      window.speechSynthesis.cancel();
+      voiceToggle.innerHTML = '🔇';
+      voiceToggle.style.cssText = 'background:transparent;border-color:var(--glass-border);color:var(--text-muted);';
+      // Stop orb speaking animation
+      document.querySelector('.orb-core').style.animation = 'corepulse 5s ease-in-out infinite';
+    } else {
+      voiceToggle.innerHTML = '🔊';
+      voiceToggle.style.cssText = 'background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.3);color:var(--cyan);';
+    }
+  });
+
+  function speak(text) {
+    if (!voiceEnabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    currentUtterance = utter;
+
+    // Pick best available voice — prefer female English
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v =>
+      /samantha|karen|victoria|fiona|moira|veena|female/i.test(v.name) && /en/i.test(v.lang)
+    ) || voices.find(v => /en/i.test(v.lang) && v.name.includes('Google')) 
+      || voices.find(v => /en/i.test(v.lang))
+      || voices[0];
+    if (preferred) utter.voice = preferred;
+
+    utter.rate = 0.95;
+    utter.pitch = 1.05;
+    utter.volume = 1;
+
+    // Orb pulses faster while speaking
+    utter.onstart = () => {
+      document.querySelector('.orb-core').style.animation = 'corepulse 1.2s ease-in-out infinite';
+      document.querySelectorAll('.vbar').forEach((b,i) => {
+        b.style.animationDuration = (0.4 + Math.random()*0.4) + 's';
+      });
+    };
+    utter.onend = () => {
+      document.querySelector('.orb-core').style.animation = 'corepulse 5s ease-in-out infinite';
+      document.querySelectorAll('.vbar').forEach(b => b.style.animationDuration = '');
+    };
+
+    // Voices may load async
+    if (voices.length === 0) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        const v2 = window.speechSynthesis.getVoices();
+        const p2 = v2.find(v => /samantha|karen|victoria|fiona/i.test(v.name)) || v2.find(v => /en/i.test(v.lang));
+        if (p2) utter.voice = p2;
+        window.speechSynthesis.speak(utter);
+      };
+    } else {
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
+  // Speak intro line after loader
+  setTimeout(() => speak('POSSIBLE online. All systems nominal. Ready for your command.'), 3200);
+
+  async function send() {
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    respText.className = 'resp-text';
+    respText.innerHTML = '<span class="cursor"></span>';
+    void respText.offsetWidth;
+    respText.classList.add('on');
+
+    try {
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBN6L1ZpGH-NzR9q15ktq3qFacpzy32I76Iuy3Tbg-fpFYNQ', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: `You are POSSIBLE — a premium AI intelligence system built by OK Empire. You are sharp, confident, cinematic. You speak with authority and precision. Never more than 3 sentences. No markdown, no asterisks, no bullet points. Pure clean text. You are aware of the world.` }] },
+          contents: [{ parts: [{ text: msg }] }]
+        })
+      });
+      const data = await res.json();
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Signal interrupted. Reconnecting to network...';
+      typeText(reply);
+    } catch {
+      typeText('Intelligence network unreachable. Check your connection and try again.');
+    }
+  }
+
+  document.getElementById('sendBtn').addEventListener('click', send);
+  input.addEventListener('keydown', e => e.key === 'Enter' && send());
+
+  // Voice
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR) {
+    const rec = new SR();
+    rec.lang = 'en-US';
+    let on = false;
+    const mic = document.getElementById('micBtn');
+    rec.onresult = e => { input.value = e.results[0][0].transcript; mic.classList.remove('on'); on = false; };
+    rec.onend = () => { mic.classList.remove('on'); on = false; };
+    mic.addEventListener('click', () => {
+      if (!on) { rec.start(); mic.classList.add('on'); on = true; }
+      else { rec.stop(); }
+    });
+  }
+
+  // Feed count flicker
+  setInterval(() => {
+    document.getElementById('feedCount').textContent = (238 + Math.floor(Math.random()*18)).toString();
+  }, 6000);
+
+  // ── LIVE NEWS ──────────────────────────────────────────────
+  const CATEGORIES = ['technology','science','health','business','general'];
+  let allArticles = [];
+  let currentCat = 'general';
+
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return `${diff}s AGO`;
+    if (diff < 3600) return `${Math.floor(diff/60)} MIN AGO`;
+    if (diff < 86400) return `${Math.floor(diff/3600)} HR AGO`;
+    return `${Math.floor(diff/86400)} DAYS AGO`;
+  }
+
+  function categoryLabel(cat) {
+    const map = {
+      technology: 'TECHNOLOGY', science: 'SCIENCE',
+      health: 'HEALTH', business: 'FINANCE', general: 'WORLD'
+    };
+    return map[cat] || cat.toUpperCase();
+  }
+
+  function renderNews(articles) {
+    const feed = document.getElementById('newsFeed');
+    if (!articles.length) {
+      feed.innerHTML = `<div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);padding:20px 8px;letter-spacing:2px;">NO SIGNAL</div>`;
+      return;
+    }
+    feed.innerHTML = articles.slice(0, 12).map(a => `
+      <div class="news-item" onclick="window.open('${a.url}','_blank')">
+        <div class="news-tag">${categoryLabel(a._cat || currentCat)}</div>
+        <div class="news-title">${a.title?.replace(/\s*-\s*[^-]+$/, '') || 'No title'}</div>
+        <div class="news-time">${timeAgo(a.publishedAt)}</div>
+      </div>
+    `).join('');
+    document.getElementById('feedCount').textContent = articles.length;
+  }
+
+  async function fetchNews(cat = 'general') {
+    const feed = document.getElementById('newsFeed');
+    feed.innerHTML = `<div class="news-loading"><div class="news-load-dot"></div><div class="news-load-dot"></div><div class="news-load-dot"></div></div>`;
+
+    // RSS feeds via rss2json proxy — no API key, no domain restrictions
+    const RSS_FEEDS = {
+      general: 'https://feeds.bbci.co.uk/news/rss.xml',
+      technology: 'https://feeds.bbci.co.uk/news/technology/rss.xml',
+      science: 'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
+      health: 'https://feeds.bbci.co.uk/news/health/rss.xml',
+      business: 'https://feeds.bbci.co.uk/news/business/rss.xml',
+    };
+
+    try {
+      const rssUrl = RSS_FEEDS[cat] || RSS_FEEDS.general;
+      const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=12`);
+      const data = await res.json();
+      if (data.status === 'ok' && data.items?.length) {
+        allArticles = data.items.map(item => ({
+          title: item.title,
+          url: item.link,
+          publishedAt: item.pubDate,
+          _cat: cat
+        }));
+        renderNews(allArticles);
+      } else {
+        feed.innerHTML = `<div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);padding:20px 8px;letter-spacing:2px;">FEED UNAVAILABLE</div>`;
+      }
+    } catch {
+      feed.innerHTML = `<div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);padding:20px 8px;letter-spacing:2px;">CONNECTION ERROR</div>`;
+    }
+  }
+
+  // Category filter buttons
+  const sidebarRight = document.querySelector('.sidebar-right');
+  const filterWrap = document.createElement('div');
+  filterWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;';
+  filterWrap.innerHTML = CATEGORIES.map(c => `
+    <button class="cat-btn ${c==='general'?'cat-active':''}" data-cat="${c}"
+      style="padding:4px 10px;border-radius:100px;border:1px solid var(--glass-border);
+      background:${c==='general'?'rgba(0,212,255,0.1)':'transparent'};
+      color:${c==='general'?'var(--cyan)':'var(--text-muted)'};
+      font-family:var(--font-mono);font-size:8px;letter-spacing:2px;cursor:pointer;
+      transition:all 0.2s;">
+      ${c.toUpperCase()}
+    </button>`).join('');
+
+  const panelLabel = sidebarRight.querySelector('.panel-label');
+  panelLabel.after(filterWrap);
+
+  filterWrap.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterWrap.querySelectorAll('.cat-btn').forEach(b => {
+        b.style.background = 'transparent';
+        b.style.color = 'var(--text-muted)';
+        b.style.borderColor = 'var(--glass-border)';
+      });
+      btn.style.background = 'rgba(0,212,255,0.1)';
+      btn.style.color = 'var(--cyan)';
+      btn.style.borderColor = 'rgba(0,212,255,0.3)';
+      currentCat = btn.dataset.cat;
+      fetchNews(currentCat);
+    });
+  });
+
+  // Initial fetch + auto-refresh every 60s
+  fetchNews('general');
+  setInterval(() => fetchNews(currentCat), 60000);
+</script>
+</body>
+</html>
